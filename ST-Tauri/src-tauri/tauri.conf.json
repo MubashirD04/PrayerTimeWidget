@@ -12,9 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "st-tauri",
-        "width": 800,
-        "height": 600
+        "title": "Salah Widget",
+        "width": 320,
+        "height": 450,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "alwaysOnTop": false
       }
     ],
     "security": {
