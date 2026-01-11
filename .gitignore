@@ -1,25 +1,13 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-build/
-develop-eggs/
+# Node
+node_modules/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+
+# Rust
+target/
+
+# Tauri
+src-tauri/target/
+src-tauri/gen/schemas/
 
 # Virtual Environment
 venv/
@@ -31,8 +19,11 @@ settings.json
 prayer_cache.json
 
 # IDEs
-.idea/
 .vscode/
+.idea/
+*.suo
+*.sln
 
-# Logs
+# Misc
 *.log
+.DS_Store
