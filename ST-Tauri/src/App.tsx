@@ -4,7 +4,14 @@ import './App.css';
 import { getCurrentWindow } from '@tauri-apps/api/window'; // For drag if needed, or use data-tauri-drag-region
 
 function App() {
+  /* Location State */
   const [location, setLocation] = useState<LocationData | null>(null);
+  const [savedLocations, setSavedLocations] = useState<LocationData[]>(() => {
+    const saved = localStorage.getItem('savedLocations');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  /* Data State */
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [nextPrayer, setNextPrayer] = useState<{ name: string, time: string, countdown: string }>({ name: '--', time: '--:--', countdown: '--' });
   const [currentTime, setCurrentTime] = useState<string>('--:--');
@@ -23,10 +30,16 @@ function App() {
   }, []);
 
   const initApp = async () => {
-    // TODO: Load from validation/persistence if needed
-    // For now, auto-detect
+    // 1. Try to load last used or first saved location
+    if (savedLocations.length > 0) {
+      selectLocation(savedLocations[0]);
+      return;
+    }
+
+    // 2. Auto-detect if no saved locations
     try {
       const loc = await api.getLocationAuto();
+      // Auto-save auto-detected location? Maybe just set it for now.
       setLocation(loc);
       await refreshData(loc.lat, loc.lon);
     } catch (e) {
@@ -62,17 +75,54 @@ function App() {
     setCompletedPrayers(newSet);
   };
 
+  /* Location Management */
+  const saveLocations = (locs: LocationData[]) => {
+    setSavedLocations(locs);
+    localStorage.setItem('savedLocations', JSON.stringify(locs));
+  };
+
   const handleAddLocation = async () => {
     const city = prompt("Enter city name:");
     if (city) {
       try {
         const res = await api.searchCity(city);
-        setLocation(res);
-        await refreshData(res.lat, res.lon);
+
+        // 1. Ensure CURRENT location is saved if it exists and isn't in list
+        let currentLocs = [...savedLocations];
+        if (location && !currentLocs.some(l => l.city === location.city)) {
+          currentLocs.push(location);
+        }
+
+        // 2. Add NEW location if not duplicate
+        if (!currentLocs.some(l => l.city === res.city)) {
+          currentLocs.push(res);
+        }
+
+        saveLocations(currentLocs);
+        selectLocation(res);
         setShowMenu(false);
       } catch (e) {
         alert("Location not found");
       }
+    }
+  };
+
+  const selectLocation = async (loc: LocationData) => {
+    setLocation(loc);
+    // Persist current selection preference if desired, or just session based
+    await refreshData(loc.lat, loc.lon);
+    setShowMenu(false);
+  };
+
+  const removeLocation = (e: React.MouseEvent, city: string) => {
+    e.stopPropagation();
+    const newLocs = savedLocations.filter(l => l.city !== city);
+    saveLocations(newLocs);
+    if (location?.city === city && newLocs.length > 0) {
+      selectLocation(newLocs[0]);
+    } else if (newLocs.length === 0) {
+      setLocation(null);
+      setPrayerTimes(null);
     }
   };
 
@@ -94,13 +144,20 @@ function App() {
       {/* Menu Overlay */}
       {showMenu && (
         <div className="location-menu">
-          <div className="menu-item active">
-            {location?.city}
-            <span className="close-btn" onClick={() => setShowMenu(false)}>×</span>
+          <div className="location-list">
+            {savedLocations.map(loc => (
+              <div
+                key={loc.city}
+                className={`menu-item ${location?.city === loc.city ? 'active' : ''}`}
+                onClick={() => selectLocation(loc)}
+              >
+                <span className="city-name">{loc.city}</span>
+                <span className="close-btn" onClick={(e) => removeLocation(e, loc.city)}>×</span>
+              </div>
+            ))}
           </div>
-          {/* Saved locations list would go here */}
-          <div className="menu-item" onClick={handleAddLocation}>+ Add Location</div>
-          <div className="menu-item" onClick={() => getCurrentWindow().close()}>Quit</div>
+          <div className="menu-item add-btn" onClick={handleAddLocation}>+ Add Location</div>
+          <div className="menu-item quit-btn" onClick={() => getCurrentWindow().close()}>Quit</div>
         </div>
       )}
 

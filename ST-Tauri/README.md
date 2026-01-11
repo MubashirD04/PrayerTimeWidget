@@ -5,9 +5,11 @@ This is a modern, high-performance desktop widget for prayer times, rebuilt usin
 ## ✨ Features
 - **Glassmorphism UI**: A sleek, modern design that fits perfectly on your desktop.
 - **Auto-location**: Automatically detects your city and fetches prayer times.
-- **Manual Search**: Add and switch between multiple locations.
+- **Multi-Location Support**: Save multiple cities and switch between them instantly.
+- **Autostart**: Automatically launches when you start your computer.
+- **Robust Caching**: Prayer times are cached locally to minimize API calls and ensure instant loading.
 - **Countdown**: Real-time countdown to the next prayer.
-- **Lightweight**: Uses the native OS webview for minimal resource usage.
+- **Lightweight**: Optimized Rust backend with minimal resource usage.
 
 ---
 
@@ -49,14 +51,13 @@ To create a standalone installer for Windows:
    `src-tauri/target/release/bundle/nsis/st-tauri_0.1.0_x64-setup.exe`
 
 3. **Install**:
-   Run the generated `.exe` to install the widget on your system. It will appear in your applications list.
+   Run the generated `.exe` to install the widget on your system.
 
 ---
 
 ## 📂 Project Structure
-- `src-tauri/`: The Rust backend logic (API calls, data processing).
-- `src/`: The React frontend (UI components, styling, timers).
+- `src-tauri/`: The Rust backend logic (API calls, data processing, caching).
+- `src/`: The React frontend (UI components, styling, timers, state management).
 
 ## 📄 License
 MIT
-
