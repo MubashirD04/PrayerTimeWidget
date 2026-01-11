@@ -1,0 +1,215 @@
+:root {
+  --bg-color: rgba(20, 20, 25, 0.85);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-blue: #4da6ff;
+  --font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+  --radius-lg: 24px;
+  --radius-sm: 8px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background: transparent; /* Transparent for Tauri window */
+  color: var(--text-primary);
+  user-select: none;
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  box-sizing: border-box;
+  height: 100vh;
+}
+
+.widget-container {
+  background-color: var(--bg-color);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.city-badge {
+  color: var(--text-blue);
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 8px;
+  background: rgba(77, 166, 255, 0.1);
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.city-badge:hover {
+  background: rgba(77, 166, 255, 0.2);
+}
+
+.clock {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.next-label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 5px;
+}
+
+.next-time {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(255,255,255,0.1);
+}
+
+.countdown {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Separator & Toggle */
+.divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 5px 0;
+  position: relative;
+  cursor: pointer;
+}
+
+.divider::after {
+  content: '';
+  position: absolute;
+  top: -5px; bottom: -5px; left: 0; right: 0;
+}
+
+.prayer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.prayer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.prayer-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.prayer-row.next {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.prayer-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #bbbbbb;
+}
+
+.prayer-time {
+  font-size: 15px;
+  color: #bbbbbb;
+}
+
+.prayer-row.next .prayer-name,
+.prayer-row.next .prayer-time {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.prayer-row.completed .prayer-name,
+.prayer-row.completed .prayer-time {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Menu */
+.location-menu {
+  position: absolute;
+  top: 50px;
+  left: 30px;
+  background: #1a1a1f;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 8px;
+  z-index: 100;
+  width: 200px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+}
+
+.menu-item {
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  font-size: 13px;
+}
+
+.menu-item:hover {
+  background: #333;
+}
+
+.menu-item.active {
+  color: var(--text-blue);
+  font-weight: bold;
+}
+
+.close-btn {
+  color: #666;
+  font-size: 18px;
+  padding: 0 5px;
+}
+
+.close-btn:hover {
+  color: #ff4d4d;
+}
