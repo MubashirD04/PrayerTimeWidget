@@ -21,6 +21,11 @@ async fn get_next_prayer_cmd(timings: PrayerTimes) -> (String, String, String) {
     prayer_api::get_next_prayer(&timings)
 }
 
+#[tauri::command]
+fn close_window(window: tauri::Window) {
+    let _ = window.close();
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -39,7 +44,8 @@ pub fn run() {
             get_location_auto,
             search_city,
             get_prayer_times_cmd,
-            get_next_prayer_cmd
+            get_next_prayer_cmd,
+            close_window
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

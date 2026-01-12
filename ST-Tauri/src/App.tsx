@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api, LocationData, PrayerTimes } from './api';
 import './App.css';
-import { getCurrentWindow } from '@tauri-apps/api/window'; // For drag if needed, or use data-tauri-drag-region
 
 function App() {
   /* Location State */
@@ -18,6 +17,8 @@ function App() {
   const [expanded, setExpanded] = useState(false);
   const [completedPrayers, setCompletedPrayers] = useState<Set<string>>(new Set());
   const [showMenu, setShowMenu] = useState(false);
+  const [isAddingLocation, setIsAddingLocation] = useState(false);
+  const [newCityInput, setNewCityInput] = useState("");
   const dataRef = useRef<{ times: PrayerTimes | null }>({ times: null });
 
   // Initial Load
@@ -82,28 +83,34 @@ function App() {
   };
 
   const handleAddLocation = async () => {
-    const city = prompt("Enter city name:");
-    if (city) {
-      try {
-        const res = await api.searchCity(city);
+    if (!newCityInput.trim()) return;
+    try {
+      const res = await api.searchCity(newCityInput);
 
-        // 1. Ensure CURRENT location is saved if it exists and isn't in list
-        let currentLocs = [...savedLocations];
-        if (location && !currentLocs.some(l => l.city === location.city)) {
-          currentLocs.push(location);
-        }
-
-        // 2. Add NEW location if not duplicate
-        if (!currentLocs.some(l => l.city === res.city)) {
-          currentLocs.push(res);
-        }
-
-        saveLocations(currentLocs);
-        selectLocation(res);
-        setShowMenu(false);
-      } catch (e) {
-        alert("Location not found");
+      // 1. Ensure CURRENT location is saved if it exists and isn't in list
+      let currentLocs = [...savedLocations];
+      if (location && !currentLocs.some(l => l.city === location.city)) {
+        currentLocs.push(location);
       }
+
+      // 2. Add NEW location if not duplicate
+      if (!currentLocs.some(l => l.city === res.city)) {
+        currentLocs.push(res);
+      }
+
+      saveLocations(currentLocs);
+      selectLocation(res);
+      setNewCityInput("");
+      setIsAddingLocation(false);
+    } catch (e) {
+      alert("Location not found");
+    }
+  };
+
+  const toggleAddingLocation = () => {
+    setIsAddingLocation(!isAddingLocation);
+    if (!isAddingLocation) {
+      setNewCityInput("");
     }
   };
 
@@ -129,17 +136,23 @@ function App() {
   const prayerOrder = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
   return (
-    <div className="widget-container" data-tauri-drag-region>
+    <div className="widget-container">
+      {/* Title Bar Drag Region */}
+      <div className="widget-header" data-tauri-drag-region></div>
+
       {/* Header */}
-      <div className="header" data-tauri-drag-region>
-        <div
-          className="city-badge"
-          onClick={() => setShowMenu(!showMenu)}
-        >
-          {location?.city.toUpperCase() || "LOADING..."}
+      <div className="header">
+        <div className="header-left">
+          <div
+            className="city-badge"
+            onClick={() => setShowMenu(!showMenu)}
+          >
+            {location?.city.toUpperCase() || "LOADING..."}
+          </div>
         </div>
         <div className="clock">{currentTime}</div>
       </div>
+
 
       {/* Menu Overlay */}
       {showMenu && (
@@ -156,14 +169,31 @@ function App() {
               </div>
             ))}
           </div>
-          <div className="menu-item add-btn" onClick={handleAddLocation}>+ Add Location</div>
-          <div className="menu-item quit-btn" onClick={() => getCurrentWindow().close()}>Quit</div>
+
+          {isAddingLocation ? (
+            <div className="menu-input-row">
+              <input
+                autoFocus
+                className="menu-input"
+                placeholder="Enter city..."
+                value={newCityInput}
+                onChange={(e) => setNewCityInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddLocation()}
+              />
+              <button className="menu-btn search-btn" onClick={handleAddLocation}>✓</button>
+              <button className="menu-btn cancel-btn" onClick={() => setIsAddingLocation(false)}>✕</button>
+            </div>
+          ) : (
+            <div className="menu-item add-btn" onClick={toggleAddingLocation}>+ Add Location</div>
+          )}
+
+          <div className="menu-item quit-btn" onClick={() => api.closeWindow()}>Quit</div>
         </div>
       )}
 
       {/* Hero */}
-      <div className="hero" data-tauri-drag-region>
-        <div className="next-label">NEXT PRAYER</div>
+      <div className="hero">
+        <div className="next-label">{nextPrayer.name.toUpperCase() || "NEXT PRAYER"}</div>
         <div className="next-time">{nextPrayer.time}</div>
         <div className="countdown">{nextPrayer.countdown}</div>
       </div>

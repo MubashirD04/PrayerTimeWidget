@@ -44,12 +44,55 @@ body {
   transition: all 0.3s ease;
 }
 
+.widget-header {
+  height: 22px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-color);
+  margin: -25px -20px 0 -20px;
+  padding: 0 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  cursor: grab;
+  -webkit-app-region: drag;
+}
+
+.widget-header:active {
+  cursor: grabbing;
+}
+
+button,
+input,
+.city-badge,
+.menu-item,
+.prayer-row {
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
+}
+
 /* Header */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 5px;
 }
+
 
 .city-badge {
   color: var(--text-blue);
@@ -62,6 +105,7 @@ body {
   background: rgba(77, 166, 255, 0.1);
   border-radius: 6px;
   transition: background 0.2s;
+  pointer-events: auto;
 }
 
 .city-badge:hover {
@@ -70,8 +114,12 @@ body {
 
 .clock {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  pointer-events: none;
 }
 
 /* Hero */
@@ -84,16 +132,16 @@ body {
 
 .next-label {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 15px;
   font-weight: bold;
   letter-spacing: 2px;
-  margin-bottom: 5px;
 }
 
 .next-time {
   font-size: 48px;
   font-weight: 700;
   line-height: 1;
+  padding: 8px 0;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
@@ -101,6 +149,7 @@ body {
   color: rgba(255, 255, 255, 0.6);
   font-size: 16px;
   font-weight: 500;
+  padding: 8px 0 2px;
 }
 
 /* Separator & Toggle */
@@ -110,6 +159,7 @@ body {
   margin: 5px 0;
   position: relative;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .divider::after {
@@ -136,6 +186,7 @@ body {
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.2s;
+  pointer-events: auto;
 }
 
 .prayer-row:hover {
@@ -196,6 +247,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  pointer-events: auto;
 }
 
 .location-list {
@@ -253,4 +305,60 @@ body {
 
 .close-btn:hover {
   color: #ff4d4d;
+}
+
+.menu-input-row {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-top: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.menu-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  padding: 4px 8px;
+  outline: none;
+  min-width: 0;
+}
+
+.menu-input::placeholder {
+  color: #666;
+}
+
+.menu-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.search-btn:hover {
+  background: rgba(77, 166, 255, 0.2);
+  color: var(--text-blue);
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 77, 77, 0.2);
+  color: #ff4d4d;
+}
+
+.add-btn {
+  color: var(--text-blue);
+}
+
+.quit-btn {
+  color: #ff4d4d;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 8px;
 }

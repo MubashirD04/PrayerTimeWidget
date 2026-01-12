@@ -30,5 +30,9 @@ export const api = {
     getNextPrayer: async (timings: PrayerTimes): Promise<[string, string, string]> => {
         // Returns [Name, Time, Countdown]
         return await invoke("get_next_prayer_cmd", { timings });
+    },
+
+    closeWindow: async (): Promise<void> => {
+        return await invoke("close_window");
     }
 };
