@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { getCurrentWindow, LogicalSize } from '@tauri-apps/api/window';
 import { api, LocationData, PrayerTimes } from './api';
 import './App.css';
 
@@ -15,6 +16,19 @@ function App() {
   const [nextPrayer, setNextPrayer] = useState<{ name: string, time: string, countdown: string }>({ name: '--', time: '--:--', countdown: '--' });
   const [currentTime, setCurrentTime] = useState<string>('--:--');
   const [expanded, setExpanded] = useState(false);
+
+  /* Resizing Logic */
+  useEffect(() => {
+    const resizeWindow = async () => {
+      const appWindow = getCurrentWindow();
+      if (expanded) {
+        await appWindow.setSize(new LogicalSize(310, 500));
+      } else {
+        await appWindow.setSize(new LogicalSize(310, 270));
+      }
+    };
+    resizeWindow();
+  }, [expanded]);
   const [completedPrayers, setCompletedPrayers] = useState<Set<string>>(new Set());
   const [showMenu, setShowMenu] = useState(false);
   const [isAddingLocation, setIsAddingLocation] = useState(false);

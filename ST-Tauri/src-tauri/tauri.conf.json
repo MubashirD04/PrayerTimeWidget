@@ -12,14 +12,17 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "Salah Widget",
-        "width": 320,
-        "height": 450,
+        "width": 310,
+        "height": 270,
         "decorations": false,
         "transparent": true,
         "shadow": false,
         "alwaysOnTop": false,
-        "dragDropEnabled": true
+        "dragDropEnabled": true,
+        "resizable": true,
+        "skipTaskbar": true
       }
     ],
     "security": {
