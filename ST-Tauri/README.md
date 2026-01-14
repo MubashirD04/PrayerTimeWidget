@@ -1,8 +1,8 @@
-# Salah Widget (Tauri Version)
+# Salah Tracker (Tauri Version)
 
 This is a modern, high-performance desktop widget for prayer times, rebuilt using **Rust (Tauri)** and **React**.
 
-## ✨ Features
+## Features
 - **Glassmorphism UI**: A sleek, modern design that fits perfectly on your desktop.
 - **Auto-location**: Automatically detects your city and fetches prayer times.
 - **Multi-Location Support**: Save multiple cities and switch between them instantly.
@@ -13,7 +13,7 @@ This is a modern, high-performance desktop widget for prayer times, rebuilt usin
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - **Node.js**: [Download here](https://nodejs.org/)
@@ -22,7 +22,7 @@ This is a modern, high-performance desktop widget for prayer times, rebuilt usin
 ### Installation & Development
 1. **Clone and Navigate**:
    ```bash
-   cd ST-Tauri
+   cd Salah-Tracker
    ```
 
 2. **Install Dependencies**:
@@ -48,14 +48,14 @@ To create a standalone installer for Windows:
 
 2. **Locate the Installer**:
    After the build completes, your installer will be located in:
-   `src-tauri/target/release/bundle/nsis/st-tauri_0.1.0_x64-setup.exe`
+   `src-tauri/target/release/bundle/nsis/salah-tracker_0.1.0_x64-setup.exe`
 
 3. **Install**:
    Run the generated `.exe` to install the widget on your system.
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 - `src-tauri/`: The Rust backend logic (API calls, data processing, caching).
 - `src/`: The React frontend (UI components, styling, timers, state management).
 

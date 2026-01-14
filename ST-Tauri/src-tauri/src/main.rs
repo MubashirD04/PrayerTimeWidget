@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    st_tauri_lib::run()
+    salah_tracker_lib::run()
 }

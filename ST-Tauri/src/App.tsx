@@ -4,38 +4,63 @@ import { api, LocationData, PrayerTimes } from './api';
 import './App.css';
 
 function App() {
-  /* Location State */
+  /* ============================================
+     STATE MANAGEMENT
+     ============================================ */
+
+  // Location State
   const [location, setLocation] = useState<LocationData | null>(null);
   const [savedLocations, setSavedLocations] = useState<LocationData[]>(() => {
     const saved = localStorage.getItem('savedLocations');
     return saved ? JSON.parse(saved) : [];
   });
 
-  /* Data State */
+  // Prayer Data State
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
-  const [nextPrayer, setNextPrayer] = useState<{ name: string, time: string, countdown: string }>({ name: '--', time: '--:--', countdown: '--' });
+  const [nextPrayer, setNextPrayer] = useState<{ name: string, time: string, countdown: string }>({
+    name: '--',
+    time: '--:--',
+    countdown: '--'
+  });
   const [currentTime, setCurrentTime] = useState<string>('--:--');
-  const [expanded, setExpanded] = useState(false);
-
-  /* Resizing Logic */
-  useEffect(() => {
-    const resizeWindow = async () => {
-      const appWindow = getCurrentWindow();
-      if (expanded) {
-        await appWindow.setSize(new LogicalSize(310, 500));
-      } else {
-        await appWindow.setSize(new LogicalSize(310, 270));
-      }
-    };
-    resizeWindow();
-  }, [expanded]);
   const [completedPrayers, setCompletedPrayers] = useState<Set<string>>(new Set());
+
+  // UI State
+  const [expanded, setExpanded] = useState(false);
+  const [isAnimatingContent, setIsAnimatingContent] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isAddingLocation, setIsAddingLocation] = useState(false);
   const [newCityInput, setNewCityInput] = useState("");
+
+  // Refs
   const dataRef = useRef<{ times: PrayerTimes | null }>({ times: null });
 
-  // Initial Load
+  /* ============================================
+     WINDOW RESIZE LOGIC
+     ============================================ */
+  useEffect(() => {
+    const handleResize = async () => {
+      const appWindow = getCurrentWindow();
+      if (expanded) {
+        // Expand window first to give room for animation
+        await appWindow.setSize(new LogicalSize(330, 500));
+        // Trigger CSS animation after a tiny delay so window is ready
+        setTimeout(() => setIsAnimatingContent(true), 10);
+      } else {
+        // Start CSS collapse animation
+        setIsAnimatingContent(false);
+        // Wait for CSS transition (400ms) before shrinking window
+        setTimeout(async () => {
+          await appWindow.setSize(new LogicalSize(330, 280));
+        }, 400);
+      }
+    };
+    handleResize();
+  }, [expanded]);
+
+  /* ============================================
+     INITIALIZATION
+     ============================================ */
   useEffect(() => {
     initApp();
 
@@ -45,23 +70,25 @@ function App() {
   }, []);
 
   const initApp = async () => {
-    // 1. Try to load last used or first saved location
+    // Try to load last used or first saved location
     if (savedLocations.length > 0) {
       selectLocation(savedLocations[0]);
       return;
     }
 
-    // 2. Auto-detect if no saved locations
+    // Auto-detect if no saved locations
     try {
       const loc = await api.getLocationAuto();
-      // Auto-save auto-detected location? Maybe just set it for now.
       setLocation(loc);
       await refreshData(loc.lat, loc.lon);
     } catch (e) {
-      console.error(e);
+      console.error('Failed to auto-detect location:', e);
     }
   };
 
+  /* ============================================
+     DATA MANAGEMENT
+     ============================================ */
   const refreshData = async (lat: number, lon: number) => {
     try {
       const times = await api.getPrayerTimes(lat, lon);
@@ -69,7 +96,7 @@ function App() {
       dataRef.current.times = times;
       updateTime();
     } catch (e) {
-      console.error(e);
+      console.error('Failed to fetch prayer times:', e);
     }
   };
 
@@ -85,29 +112,41 @@ function App() {
 
   const toggleComplete = (name: string) => {
     const newSet = new Set(completedPrayers);
-    if (newSet.has(name)) newSet.delete(name);
-    else newSet.add(name);
+    if (newSet.has(name)) {
+      newSet.delete(name);
+    } else {
+      newSet.add(name);
+    }
     setCompletedPrayers(newSet);
   };
 
-  /* Location Management */
+  /* ============================================
+     LOCATION MANAGEMENT
+     ============================================ */
   const saveLocations = (locs: LocationData[]) => {
     setSavedLocations(locs);
     localStorage.setItem('savedLocations', JSON.stringify(locs));
   };
 
+  const selectLocation = async (loc: LocationData) => {
+    setLocation(loc);
+    await refreshData(loc.lat, loc.lon);
+    setShowMenu(false);
+  };
+
   const handleAddLocation = async () => {
     if (!newCityInput.trim()) return;
+
     try {
       const res = await api.searchCity(newCityInput);
 
-      // 1. Ensure CURRENT location is saved if it exists and isn't in list
+      // Ensure current location is saved if it exists and isn't in list
       let currentLocs = [...savedLocations];
       if (location && !currentLocs.some(l => l.city === location.city)) {
         currentLocs.push(location);
       }
 
-      // 2. Add NEW location if not duplicate
+      // Add new location if not duplicate
       if (!currentLocs.some(l => l.city === res.city)) {
         currentLocs.push(res);
       }
@@ -128,17 +167,11 @@ function App() {
     }
   };
 
-  const selectLocation = async (loc: LocationData) => {
-    setLocation(loc);
-    // Persist current selection preference if desired, or just session based
-    await refreshData(loc.lat, loc.lon);
-    setShowMenu(false);
-  };
-
   const removeLocation = (e: React.MouseEvent, city: string) => {
     e.stopPropagation();
     const newLocs = savedLocations.filter(l => l.city !== city);
     saveLocations(newLocs);
+
     if (location?.city === city && newLocs.length > 0) {
       selectLocation(newLocs[0]);
     } else if (newLocs.length === 0) {
@@ -147,8 +180,18 @@ function App() {
     }
   };
 
+  /* ============================================
+     HELPERS
+     ============================================ */
   const prayerOrder = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
+  const getCityDisplayName = (cityName: string) => {
+    return cityName.split(',')[0].toUpperCase();
+  };
+
+  /* ============================================
+     RENDER
+     ============================================ */
   return (
     <div className="widget-container">
       {/* Title Bar Drag Region */}
@@ -161,14 +204,13 @@ function App() {
             className="city-badge"
             onClick={() => setShowMenu(!showMenu)}
           >
-            {location?.city.toUpperCase() || "LOADING..."}
+            {location ? getCityDisplayName(location.city) : "LOADING..."}
           </div>
         </div>
         <div className="clock">{currentTime}</div>
       </div>
 
-
-      {/* Menu Overlay */}
+      {/* Location Menu Overlay */}
       {showMenu && (
         <div className="location-menu">
           <div className="location-list">
@@ -205,19 +247,20 @@ function App() {
         </div>
       )}
 
-      {/* Hero */}
+      {/* Hero Section */}
       <div className="hero">
         <div className="next-label">{nextPrayer.name.toUpperCase() || "NEXT PRAYER"}</div>
         <div className="next-time">{nextPrayer.time}</div>
         <div className="countdown">{nextPrayer.countdown}</div>
       </div>
 
-      {/* Toggle / List */}
+      {/* Toggle Divider */}
       <div className="divider" onClick={() => setExpanded(!expanded)}></div>
 
-      {expanded && prayerTimes && (
+      {/* Prayer List */}
+      <div className={`prayer-list-wrapper ${isAnimatingContent ? 'expanded' : ''}`}>
         <div className="prayer-list">
-          {prayerOrder.map(key => {
+          {prayerTimes && prayerOrder.map(key => {
             const time = prayerTimes[key as keyof PrayerTimes];
             const isNext = key === nextPrayer.name;
             const isCompleted = completedPrayers.has(key);
@@ -234,7 +277,7 @@ function App() {
             );
           })}
         </div>
-      )}
+      </div>
     </div>
   );
 }
