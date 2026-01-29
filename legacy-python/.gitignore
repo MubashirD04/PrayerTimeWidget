@@ -1,39 +1,45 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
 
-# Virtual Environment
-venv/
-.venv/
-ENV/
+# Production
+/dist
+/dist-ssr
 
-# Project specific
-settings.json
-prayer_cache.json
-
-# IDEs
-.idea/
-.vscode/
+# Rust/Tauri
+/src-tauri/target
+/src-tauri/gen
 
 # Logs
 *.log
 node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / System
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+
+# Local Data / Cache
+prayer_cache.json
+settings.json
+*.local
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
