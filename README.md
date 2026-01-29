@@ -1,6 +1,9 @@
 # Salah Tracker (Tauri Version)
 
 This is a modern, high-performance desktop widget for prayer times, rebuilt using **Rust (Tauri)** and **React**.
+<img src="https://github.com/user-attachments/assets/59a6bc00-19c1-4a06-8103-2ba588583e51" width="600" height="500" />
+
+
 
 ## Features
 - **Glassmorphism UI**: A sleek, modern design that fits perfectly on your desktop.
