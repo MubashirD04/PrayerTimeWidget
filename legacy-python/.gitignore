@@ -36,3 +36,4 @@ prayer_cache.json
 
 # Logs
 *.log
+node_modules
