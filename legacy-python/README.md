@@ -27,7 +27,7 @@ A modern, aesthetic Windows desktop widget that displays Islamic prayer times fo
 
 To make the widget run automatically when Windows starts:
 
-### Method 1: Automated Installer (Recommended) ✨
+### Method 1: Automated Installer (Recommended)
 
 1. Right-click on `install_startup.ps1`
 2. Select **"Run with PowerShell"**
