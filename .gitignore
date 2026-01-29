@@ -1,29 +1,44 @@
-# Node
-node_modules/
-dist/
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
 
-# Rust
-target/
+# Production
+/dist
+/dist-ssr
 
-# Tauri
-src-tauri/target/
-src-tauri/gen/schemas/
+# Rust/Tauri
+/src-tauri/target
+/src-tauri/gen
 
-# Virtual Environment
-venv/
-.venv/
-ENV/
-
-# Project specific
-settings.json
-prayer_cache.json
-
-# IDEs
-.vscode/
-.idea/
-*.suo
-*.sln
-
-# Misc
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / System
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+.idea
 .DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+
+# Local Data / Cache
+prayer_cache.json
+settings.json
+*.local
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
