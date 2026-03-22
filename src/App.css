@@ -62,12 +62,12 @@ body {
    WIDGET HEADER (Drag Region)
    ============================================ */
 .widget-header {
-  height: 22px;
+  height: 28px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 10px;
   color: var(--text-secondary);
   font-weight: bold;
   letter-spacing: 1px;
@@ -78,8 +78,17 @@ body {
   background: rgba(255, 255, 255, 0.03);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   cursor: grab;
-  -webkit-app-region: drag;
 }
+
+/* Add a small handle-like bar */
+.widget-header::after {
+  content: '';
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
 
 .widget-header:active {
   cursor: grabbing;

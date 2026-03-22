@@ -87,8 +87,16 @@ function App() {
   }, [expanded]);
 
   /* ============================================
-     INITIALIZATION
+     INITIALIZATION & DRAG
      ============================================ */
+  const handleDrag = async () => {
+    try {
+      await getCurrentWindow().startDragging();
+    } catch (e) {
+      // Fallback or ignore if not supported
+    }
+  };
+
   useEffect(() => {
     initApp();
 
@@ -245,7 +253,11 @@ function App() {
   return (
     <div className="widget-container">
       {/* Title Bar Drag Region */}
-      <div className="widget-header" data-tauri-drag-region></div>
+      <div 
+        className="widget-header" 
+        data-tauri-drag-region
+        onPointerDown={handleDrag}
+      ></div>
 
       {/* Header */}
       <div className="header">

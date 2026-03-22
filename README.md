@@ -1,66 +1,123 @@
-# Salah Tracker (Tauri Version)
+# ✨ Salah Tracker: Modern Prayer Widget
 
-This is a modern, high-performance desktop widget for prayer times, rebuilt using **Rust (Tauri)** and **React**.
-<img src="https://github.com/user-attachments/assets/59a6bc00-19c1-4a06-8103-2ba588583e51" width="600" height="500" />
+A high-performance, minimalist desktop widget for tracking prayer times. Rebuilt from the ground up using **Tauri v2**, **Rust**, and **React 19** for maximum efficiency and a premium feel.
 
-
-
-## Features
-- **Glassmorphism UI**: A sleek, modern design that fits perfectly on your desktop.
-- **Auto-location**: Automatically detects your city and fetches prayer times.
-- **Multi-Location Support**: Save multiple cities and switch between them instantly.
-- **Autostart**: Automatically launches when you start your computer.
-- **Robust Caching**: Prayer times are cached locally to minimize API calls and ensure instant loading.
-- **Countdown**: Real-time countdown to the next prayer.
-- **Lightweight**: Optimized Rust backend with minimal resource usage.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/59a6bc00-19c1-4a06-8103-2ba588583e51" width="600" />
+</p>
 
 ---
 
-## Getting Started
+## 💎 Core Pillars
 
-### Prerequisites
-- **Node.js**: [Download here](https://nodejs.org/)
-- **Rust Toolchain**: [Install via rustup](https://rustup.rs/)
+- **🚀 Performance-First**: Powered by a Rust backend with near-zero memory footprint.
+- **🎨 Glassmorphism Design**: A sleek, transparent, and modern UI that lives elegantly on your desktop.
+- **⚡ Instant Feedback**: Sub-second startup times and smooth animations (driven by Framer-like transitions).
+- **📦 Zero Configuration**: Smart auto-location detection gets you started in seconds.
 
-### Installation & Development
-1. **Clone and Navigate**:
+---
+
+## 🌟 Key Features
+
+| Feature | Description |
+| :--- | :--- |
+| **🌍 Auto-Location** | Automatically detects your current city and fetches accurate prayer timings. |
+| **📍 Multi-City Support** | Save your favorite cities and switch between them instantly. |
+| **⏳ Real-Time Countdown** | Live countdown to the next prayer, keeping you prepared. |
+| **💨 Minimalist Footprint** | Extremely lightweight on resources compared to Electron-based alternatives. |
+| **💾 Persistent Caching** | Local caching ensures the app works offline and starts up instantly. |
+| **🖥️ Widget Mode** | Transparent background, skipped taskbar, and always-available presence. |
+| **🔁 Autostart** | Automatically launches with your system so your schedule is always synced. |
+
+---
+
+## 🛠️ Technology Stack
+
+- **Frontend**: [React 19](https://react.dev/), [Vite](https://vitejs.dev/), [TypeScript](https://www.typescriptlang.org/)
+- **Backend/Native**: [Tauri v2](https://v2.tauri.app/), [Rust](https://www.rust-lang.org/)
+- **Styling**: Vanilla CSS (Modern Custom Properties)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Plugins**: [Autostart Plugin](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/autostart)
+
+---
+
+## 🚀 Getting Started
+
+### Platform Prerequisites
+
+Before starting, ensure you have the core tools installed for your Operating System.
+
+| OS | Required Development Tools |
+| :--- | :--- |
+| **🪟 Windows** | [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) (C++ support) & [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) |
+| **🍎 macOS** | [Xcode Command Line Tools](https://developer.apple.com/xcode/) (`xcode-select --install`) |
+| **🐧 Linux** | System libraries (e.g., `libwebkit2gtk-4.1`, `build-essential`, `libappindicator3-dev`). See [Tauri Linux Guide](https://v2.tauri.app/start/prerequisites/#linux) |
+
+**All Platforms**: Require [Node.js](https://nodejs.org/) (v18+) and [Rust](https://rustup.rs/).
+
+
+### Development
+1. **Clone the project**:
    ```bash
+   git clone <repository-url>
    cd Salah-Tracker
    ```
 
-2. **Install Dependencies**:
+2. **Install dependencies**:
    ```bash
    npm install
    ```
 
-3. **Run in Development Mode**:
+3. **Run in development mode**:
    ```bash
    npm run tauri dev
    ```
 
 ---
 
-## Building for Production
+## 🏗️ Project Architecture
 
-To create a standalone installer for Windows:
+```mermaid
+graph TD
+    A[React Frontend] -- IPC / Invoke --> B[Tauri / Rust Backend]
+    B -- Fetch --> C[Prayer API]
+    B -- Store --> D[Local Persistence]
+    A -- Render --> E[Glassmorphism Widget]
+```
 
-1. **Run the build command**:
-   ```bash
-   npm run tauri build
-   ```
-
-2. **Locate the Installer**:
-   After the build completes, your installer will be located in:
-   `src-tauri/target/release/bundle/nsis/salah-tracker_0.1.0_x64-setup.exe`
-
-3. **Install**:
-   Run the generated `.exe` to install the widget on your system.
+- **`src-tauri/`**: Rust core. Handles system-level operations, API calls, and native window management.
+- **`src/`**: React application. Manages UI state, countdown logic, and interactive components.
 
 ---
 
-## Project Structure
-- `src-tauri/`: The Rust backend logic (API calls, data processing, caching).
-- `src/`: The React frontend (UI components, styling, timers, state management).
+## 📦 Packaging & Installation (Production)
 
-## License
-MIT
+To create a standalone installer for your current platform, run:
+
+```bash
+npm run tauri build
+```
+
+### Installation by Platform
+
+Once the build is complete, your installer can be found in `src-tauri/target/release/bundle/`.
+
+#### **Windows**
+- **Artifact**: `.exe` (NSIS Installer) or `.msi`
+- **Installation**: Run the generated executable and follow the setup wizard. The app will be added to your Start Menu.
+
+#### **macOS**
+- **Artifact**: `.app` or `.dmg`
+- **Installation**: Open the `.dmg` and drag **Salah Tracker** into your **Applications** folder.
+
+#### **Linux**
+- **Artifact**: `.deb` (Debian/Ubuntu) or `.rpm` (Fedora) or `AppImage`
+- **Installation**:
+  - **Debian**: `sudo dpkg -i salah-tracker_xxx_amd64.deb`
+  - **AppImage**: Right-click, select "Make Executable", and run.
+
+
+---
+
+## 📜 License
+This project is licensed under the **MIT License**.

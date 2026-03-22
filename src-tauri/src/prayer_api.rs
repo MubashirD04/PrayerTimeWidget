@@ -26,20 +26,30 @@ pub struct LocationData {
 
 #[derive(Deserialize, Debug)]
 struct IpApiResponse {
-    status: String,
-    lat: Option<f64>,
-    lon: Option<f64>,
-    city: Option<String>,
+    pub latitude: Option<f64>,
+    pub longitude: Option<f64>,
+    pub city: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
-struct AladhanResponse {
-    data: AladhanData,
+struct AladhanCalendarResponse {
+    data: Vec<AladhanDayData>,
 }
 
 #[derive(Deserialize, Debug)]
-struct AladhanData {
+struct AladhanDayData {
     timings: HashMap<String, String>,
+    date: AladhanDateInfo,
+}
+
+#[derive(Deserialize, Debug)]
+struct AladhanDateInfo {
+    gregorian: GregorianDateInfo,
+}
+
+#[derive(Deserialize, Debug)]
+struct GregorianDateInfo {
+    date: String, // "DD-MM-YYYY"
 }
 
 #[derive(Deserialize, Debug)]
@@ -103,27 +113,23 @@ fn load_cache(lat: f64, lon: f64) -> Option<PrayerTimes> {
     None
 }
 
-fn save_cache(lat: f64, lon: f64, timings: &PrayerTimes) {
+fn save_cache_batch(lat: f64, lon: f64, batch: Vec<CacheEntry>) {
     let mut store = load_store();
     let today = Local::now().format("%Y-%m-%d").to_string();
     
-    // Remove old entries for same location or old dates
+    // Cleanup: Remove old dates (anything before today)
+    // AND remove any existing entries for this location that are about to be replaced by the new batch
+    let batch_dates: std::collections::HashSet<String> = batch.iter().map(|e| e.date.clone()).collect();
+    
     store.entries.retain(|e| {
         let is_same_loc = (e.lat - lat).abs() < 0.1 && (e.lon - lon).abs() < 0.1;
-        let is_today = e.date == today;
-        // Keep if it's today AND NOT the same location (we want to replace same location with new data, or keep others)
-        // Actually, we just want to remove the specific old entry if we are updating it.
-        // Also cleanup old dates entirely? Yes.
-        is_today && !is_same_loc
+        let is_past = e.date < today;
+        let is_in_batch = batch_dates.contains(&e.date);
+        
+        !is_past && !(is_same_loc && is_in_batch)
     });
 
-    store.entries.push(CacheEntry {
-        date: today,
-        lat,
-        lon,
-        timings: timings.clone(),
-    });
-
+    store.entries.extend(batch);
     save_store(&store);
 }
 
@@ -137,17 +143,18 @@ pub async fn get_location() -> Result<LocationData, String> {
     let client = Client::new();
 
     // Source 1: ip-api.com
-    match client.get("http://ip-api.com/json").send().await {
+    // Source 1: ip-api.com (https version requires pro, but let's try or stick to a better one)
+    // Actually, ip-api.com https is paid. 
+    // Let's use ipapi.co (secure and free for basic usage)
+    match client.get("https://ipapi.co/json/").send().await {
         Ok(resp) => {
             if let Ok(data) = resp.json::<IpApiResponse>().await {
-                if data.status == "success" {
-                    if let (Some(lat), Some(lon), Some(city)) = (data.lat, data.lon, data.city) {
-                        return Ok(LocationData { lat, lon, city });
-                    }
+                if let (Some(lat), Some(lon), Some(city)) = (data.latitude, data.longitude, data.city) {
+                    return Ok(LocationData { lat, lon, city });
                 }
             }
         }
-        Err(e) => println!("ip-api failed: {}", e),
+        Err(e) => println!("ipapi.co failed: {}", e),
     }
 
     // Fallback: London
@@ -184,35 +191,63 @@ pub async fn search_location(query: &str) -> Result<LocationData, String> {
 }
 
 pub async fn fetch_prayer_times(lat: f64, lon: f64) -> Result<PrayerTimes, String> {
-    // 1. Check cache
+    // 1. Check cache for today
     if let Some(cached) = load_cache(lat, lon) {
         println!("Using cached prayer times");
         return Ok(cached);
     }
 
     let client = Client::new();
-    // Method 2: ISNA (same as Python default)
+    let now = Local::now();
+    let month = now.format("%m").to_string();
+    let year = now.format("%Y").to_string();
+    
     let url = format!(
-        "http://api.aladhan.com/v1/timings?latitude={}&longitude={}&method=2",
-        lat, lon
+        "https://api.aladhan.com/v1/calendar?latitude={}&longitude={}&method=2&month={}&year={}",
+        lat, lon, month, year
     );
 
     match client.get(&url).send().await {
-        Ok(resp) => match resp.json::<AladhanResponse>().await {
+        Ok(resp) => match resp.json::<AladhanCalendarResponse>().await {
             Ok(data) => {
-                let t = data.data.timings;
-                let timings = PrayerTimes {
-                    fajr: t.get("Fajr").unwrap_or(&"00:00".to_string()).clone(),
-                    dhuhr: t.get("Dhuhr").unwrap_or(&"00:00".to_string()).clone(),
-                    asr: t.get("Asr").unwrap_or(&"00:00".to_string()).clone(),
-                    maghrib: t.get("Maghrib").unwrap_or(&"00:00".to_string()).clone(),
-                    isha: t.get("Isha").unwrap_or(&"00:00".to_string()).clone(),
-                };
-                // 2. Save to cache
-                save_cache(lat, lon, &timings);
-                Ok(timings)
+                let mut batch = Vec::new();
+                let today_str = now.format("%Y-%m-%d").to_string();
+                let mut today_timings = None;
+
+                for day in data.data {
+                    let t = day.timings;
+                    let timings = PrayerTimes {
+                        fajr: t.get("Fajr").unwrap_or(&"00:00".to_string()).clone(),
+                        dhuhr: t.get("Dhuhr").unwrap_or(&"00:00".to_string()).clone(),
+                        asr: t.get("Asr").unwrap_or(&"00:00".to_string()).clone(),
+                        maghrib: t.get("Maghrib").unwrap_or(&"00:00".to_string()).clone(),
+                        isha: t.get("Isha").unwrap_or(&"00:00".to_string()).clone(),
+                    };
+                    
+                    // Aladhan date format is DD-MM-YYYY, convert to YYYY-MM-DD for consistency
+                    let components: Vec<&str> = day.date.gregorian.date.split('-').collect();
+                    if components.len() == 3 {
+                        let iso_date = format!("{}-{}-{}", components[2], components[1], components[0]);
+                        
+                        if iso_date == today_str {
+                            today_timings = Some(timings.clone());
+                        }
+                        
+                        batch.push(CacheEntry {
+                            date: iso_date,
+                            lat,
+                            lon,
+                            timings,
+                        });
+                    }
+                }
+                
+                // 2. Save entire month to cache
+                save_cache_batch(lat, lon, batch);
+                
+                today_timings.ok_or_else(|| "Could not find today in calendar".to_string())
             }
-            Err(e) => Err(format!("Failed to parse prayer times: {}", e)),
+            Err(e) => Err(format!("Failed to parse calendar times: {}", e)),
         },
         Err(e) => Err(format!("API Request failed: {}", e)),
     }
